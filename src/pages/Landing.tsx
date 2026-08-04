@@ -5,7 +5,7 @@ import {
   GraduationCap, Award, Zap, TrendingUp, BookOpen, Briefcase,
   Code, Cpu, FileText, Map, Bookmark, Clock, Layers,
   MessageCircle, Star, ChevronRight, Menu, X,
-  CheckCircle2, ArrowRight, Users, Building2, Play,
+  CheckCircle2, ArrowRight, Users, Building2,
 } from "lucide-react";
 
 /* ─── Scroll Reveal Hook ─── */
@@ -455,3 +455,312 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      {/* ─── FEATURES ─── */}
+      <section id="features" className="relative py-20 md:py-28">
+        <div className="absolute inset-0 bg-gradient-to-b from-muted/30 to-background pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center max-w-3xl mx-auto mb-14">
+            <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent text-sm font-medium rounded-full mb-4">Features</span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
+              Built for{" "}
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Your Success</span>
+            </h2>
+            <p className="mt-4 text-lg text-foreground/60">
+              Powerful tools to help you discover, track, and land the perfect opportunity.
+            </p>
+          </AnimatedSection>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            {features.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <AnimatedSection key={i} threshold={0.05}>
+                  <div className="group bg-white rounded-2xl border border-border p-5 hover:shadow-lg hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300 cursor-default text-center">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-sm text-foreground mb-1">{f.title}</h3>
+                    <p className="text-xs text-foreground/60 leading-relaxed">{f.desc}</p>
+                  </div>
+                </AnimatedSection>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── HOW IT WORKS ─── */}
+      <section id="how-it-works" className="relative py-20 md:py-28 bg-gradient-to-b from-background to-muted/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center max-w-3xl mx-auto mb-14">
+            <span className="inline-block px-4 py-1.5 bg-secondary/10 text-secondary text-sm font-medium rounded-full mb-4">How It Works</span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
+              From Profile to{" "}
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Opportunity</span>{" "}
+              in 4 Steps
+            </h2>
+            <p className="mt-4 text-lg text-foreground/60">
+              Getting started takes just a few minutes.
+            </p>
+          </AnimatedSection>
+          <div className="grid md:grid-cols-4 gap-6 lg:gap-8">
+            {steps.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <AnimatedSection key={i} threshold={0.1}>
+                  <div className="relative bg-white rounded-2xl border border-border p-6 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-primary to-secondary text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg">
+                      {step.num}
+                    </div>
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-4">
+                      <Icon className="w-7 h-7 text-primary" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-lg text-foreground mb-2">{step.title}</h3>
+                    <p className="text-sm text-foreground/60 leading-relaxed">{step.desc}</p>
+                  </div>
+                </AnimatedSection>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── TESTIMONIALS ─── */}
+      <section className="relative py-20 md:py-28 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center max-w-3xl mx-auto mb-14">
+            <span className="inline-block px-4 py-1.5 bg-emerald-500/10 text-emerald-600 text-sm font-medium rounded-full mb-4">Testimonials</span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
+              Loved by{" "}
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Students</span>
+            </h2>
+            <p className="mt-4 text-lg text-foreground/60">
+              Hear from people who found their path with OppNav.
+            </p>
+          </AnimatedSection>
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <AnimatedSection key={i} threshold={0.1}>
+                <div className="bg-white rounded-2xl border border-border p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(t.rating)].map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-accent text-accent" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-foreground/70 leading-relaxed mb-4 italic">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-white text-xs font-bold flex items-center justify-center">
+                      {t.avatar}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                      <p className="text-xs text-foreground/50">{t.role}</p>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ABOUT ─── */}
+      <section id="about" className="relative py-20 md:py-28 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <AnimatedSection>
+              <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">About Us</span>
+              <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground leading-tight">
+                Empowering Students to{" "}
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Find Their Path</span>
+              </h2>
+              <p className="mt-4 text-lg text-foreground/60 leading-relaxed">
+                At AI Opportunity Navigator, we believe every student deserves access to the best opportunities.
+                Our AI-powered platform eliminates the noise and delivers personalized recommendations that
+                match your unique skills, interests, and career goals.
+              </p>
+              <div className="mt-8 space-y-4">
+                {[
+                  { stat: "10K+", label: "Opportunities Listed" },
+                  { stat: "2K+", label: "Active Students" },
+                  { stat: "94%", label: "Satisfaction Rate" },
+                  { stat: "50+", label: "Partner Organizations" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-background/50 transition-colors">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                      <span className="font-heading font-bold text-primary">{item.stat}</span>
+                    </div>
+                    <span className="text-foreground/70">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </AnimatedSection>
+            <AnimatedSection>
+              <div className="relative">
+                <div className="bg-white rounded-3xl border border-border p-8 shadow-xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-heading font-bold text-lg text-foreground">OppNav</p>
+                      <p className="text-sm text-foreground/50">AI Opportunity Navigator</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-foreground/70">Completely free for all students</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-foreground/70">AI-powered matching saves hours of manual searching</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-foreground/70">Track every application in one centralized dashboard</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-foreground/70">Get personalized skill recommendations to improve</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-foreground/70">Deadline reminders so you never miss an opportunity</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 p-4 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl border border-primary/10">
+                    <p className="text-sm text-foreground/70 italic">
+                      &ldquo;Your career journey starts with the right opportunity. Let AI guide you.&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ─── */}
+      <section id="faq" className="relative py-20 md:py-28">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center mb-14">
+            <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">FAQ</span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">
+              Got Questions?{" "}
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">We&apos;ve Got Answers</span>
+            </h2>
+          </AnimatedSection>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <AnimatedSection key={i} threshold={0.05}>
+                <div className="bg-white rounded-2xl border border-border overflow-hidden transition-all duration-300 hover:shadow-md">
+                  <button
+                    onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer"
+                    aria-expanded={activeFaq === i}
+                  >
+                    <span className="font-medium text-foreground pr-4">{faq.q}</span>
+                    <ChevronRight className={`w-5 h-5 text-foreground/40 shrink-0 transition-transform duration-300 ${activeFaq === i ? "rotate-90" : ""}`} />
+                  </button>
+                  <div className={`transition-all duration-300 overflow-hidden ${activeFaq === i ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}>
+                    <p className="px-6 pb-4 text-sm text-foreground/60 leading-relaxed">{faq.a}</p>
+                  </div>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA ─── */}
+      <section className="relative py-20 md:py-28 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/50 pointer-events-none" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <AnimatedSection>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-6">
+              <Sparkles className="w-4 h-4" /> Get Started Today
+            </div>
+            <h2 className="font-heading text-3xl sm:text-5xl font-bold text-foreground leading-tight">
+              Ready to Find Your{" "}
+              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Next Opportunity</span>?
+            </h2>
+            <p className="mt-6 text-lg sm:text-xl text-foreground/60 max-w-2xl mx-auto">
+              Join thousands of students who are already discovering personalized opportunities with AI.
+              It&apos;s free, and it takes less than 2 minutes to get started.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center">
+              <button onClick={() => navigate("/login")}
+                className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-primary/25 active:scale-[0.97] transition-all cursor-pointer text-lg"
+              >Get Started Free <ArrowRight className="inline-block ml-2 w-5 h-5" /></button>
+              <button onClick={() => navigate("/login")}
+                className="w-full sm:w-auto px-10 py-4 text-foreground/70 font-semibold rounded-xl border border-border hover:border-foreground/20 hover:text-foreground hover:bg-foreground/5 active:scale-[0.97] transition-all cursor-pointer text-lg"
+              >Learn More</button>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* ─── FOOTER ─── */}
+      <footer className="bg-foreground text-background py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="sm:col-span-2 lg:col-span-2">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-heading font-bold text-xl">
+                  Opp<span className="text-primary">Nav</span>
+                </span>
+              </div>
+              <p className="text-background/60 text-sm max-w-md leading-relaxed">
+                AI Opportunity Navigator helps students discover internships, scholarships, hackathons,
+                fellowships, competitions, jobs, and bootcamps — all personalized by AI.
+              </p>
+              <div className="flex items-center gap-4 mt-6">
+                {[Star, MessageCircle, Search, Bell].map((Icon, i) => (
+                  <div key={i} className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="font-heading font-semibold text-sm text-background/80 mb-4">Quick Links</h3>
+              <ul className="space-y-2.5">
+                {["Home", "Features", "Services", "How It Works", "FAQ"].map((link) => (
+                  <li key={link}>
+                    <button onClick={() => st(`#${link.toLowerCase().replace(/\s+/g, "-")}`)}
+                      className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer"
+                    >{link}</button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-heading font-semibold text-sm text-background/80 mb-4">Get Started</h3>
+              <ul className="space-y-2.5">
+                <li>
+                  <button onClick={() => navigate("/login")} className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer">Sign Up</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/login")} className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer">Login</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/login")} className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer">Dashboard</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-10 pt-6 border-t border-white/10 text-center">
+            <p className="text-xs text-background/40">
+              &copy; {new Date().getFullYear()} AI Opportunity Navigator. Built for students, by dreamers.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );}
