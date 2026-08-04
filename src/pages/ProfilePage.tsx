@@ -8,7 +8,7 @@ import {
   Calendar,
   ArrowLeft,
   Edit3,
-  Sparkles,
+  FileText,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -114,6 +114,35 @@ export default function ProfilePage() {
                 {skill}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Resume section */}
+      {(profile?.resume_url || profile?.resume_text) && (
+        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm mb-6">
+          <h2 className="font-heading font-semibold text-lg text-foreground mb-4">
+            Resume
+          </h2>
+          <div className="flex items-center gap-3 p-3 bg-muted rounded-xl">
+            <FileText className="w-5 h-5 text-primary shrink-0" />
+            <div>
+              <p className="text-xs text-foreground/50">Resume File</p>
+              {profile.resume_url ? (
+                <a
+                  href={profile.resume_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  View uploaded resume
+                </a>
+              ) : (
+                <p className="text-sm font-medium text-foreground">
+                  Resume text provided
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}

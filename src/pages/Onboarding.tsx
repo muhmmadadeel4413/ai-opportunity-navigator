@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
@@ -13,9 +13,13 @@ import {
   Sparkles,
   Plus,
   X,
+  Upload,
+  User,
+  File as FileIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 
-type Step = "education" | "skills" | "interests" | "resume" | "review";
+type Step = "name" | "education" | "skills" | "interests" | "resume" | "review";
 
 interface FormData {
   full_name: string;
@@ -31,6 +35,7 @@ interface FormData {
   preferred_industry: string;
   location_preference: string;
   resume_text: string;
+  resume_url: string;
 }
 
 const initialFormData: FormData = {
@@ -47,6 +52,7 @@ const initialFormData: FormData = {
   preferred_industry: "",
   location_preference: "",
   resume_text: "",
+  resume_url: "",
 };
 
 const educationLevels = [
@@ -107,14 +113,17 @@ const interestSuggestions = [
 export function Onboarding() {
   const { profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("education");
+  const [step, setStep] = useState<Step>("name");
   const [form, setForm] = useState<FormData>(initialFormData);
   const [saving, setSaving] = useState(false);
   const [parsingResume, setParsingResume] = useState(false);
+  const [uploadingResume, setUploadingResume] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [stepError, setStepError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps: { key: Step; label: string; icon: typeof GraduationCap }[] = [
+    { key: "name", label: "Name", icon: User },
     { key: "education", label: "Education", icon: GraduationCap },
     { key: "skills", label: "Skills", icon: Code2 },
     { key: "interests", label: "Interests", icon: Heart },
@@ -204,9 +213,68 @@ export function Onboarding() {
     setParsingResume(false);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowed = ["application/pdf", "image/jpeg", "image/png"];
+    if (!allowed.includes(file.type)) {
+      setStepError("Please upload a PDF, JPG, or PNG file.");
+      return;
+    }
+
+    setUploadingResume(true);
+    setStepError("");
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      const userId = session.user.id;
+      const ext = file.name.split(".").pop() || "pdf";
+      const filePath = `${userId}/resume.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("resumes")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("resumes")
+        .getPublicUrl(filePath);
+
+      update("resume_url", urlData.publicUrl);
+
+      // For PDFs, try to extract text using basic file reader
+      if (file.type === "application/pdf") {
+        const text = await file.text();
+        if (text) {
+          update("resume_text", text);
+        }
+      }
+    } catch {
+      setStepError("Failed to upload file. Please try again.");
+    }
+    setUploadingResume(false);
+
+    // Reset the input so the same file can be re-uploaded
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const validateStep = (): boolean => {
     setStepError("");
     switch (step) {
+      case "name":
+        if (!form.full_name.trim()) {
+          setStepError("Please enter your full name");
+          return false;
+        }
+        return true;
       case "education":
         if (!form.education_level) {
           setStepError("Please select your education level");
@@ -248,6 +316,7 @@ export function Onboarding() {
       .upsert({
         id: profile!.id,
         email: profile!.email,
+        full_name: form.full_name.trim() || null,
         education_level: form.education_level || null,
         university: form.university || null,
         major: form.major || null,
@@ -262,6 +331,7 @@ export function Onboarding() {
         preferred_industry: form.preferred_industry || null,
         location_preference: form.location_preference || null,
         resume_text: form.resume_text || null,
+        resume_url: form.resume_url || null,
         onboarding_complete: true,
       });
 
@@ -342,6 +412,27 @@ export function Onboarding() {
 
   const renderStep = () => {
     switch (step) {
+      case "name":
+        return (
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Full Name *
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                <input
+                  type="text"
+                  value={form.full_name}
+                  onChange={(e) => update("full_name", e.target.value)}
+                  placeholder="e.g. Jane Doe"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-border rounded-xl text-sm bg-white placeholder:text-foreground/30 focus:border-primary focus:ring-3 focus:ring-ring/20 outline-none transition-all duration-200"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
       case "education":
         return (
           <div className="space-y-5">
@@ -493,14 +584,73 @@ export function Onboarding() {
         return (
           <div className="space-y-4">
             <p className="text-sm text-foreground/60">
-              Paste your resume text below. We'll use AI to extract your
-              education, skills, and interests — saving you time filling out the
-              wizard. You can also skip this and fill everything manually.
+              Upload your resume as a file (PDF, JPG, or PNG) or paste the text
+              below. We'll use AI to extract your education, skills, and
+              interests — saving you time.
             </p>
+
+            {/* File upload area */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 cursor-pointer"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              {uploadingResume ? (
+                <div className="flex flex-col items-center gap-2">
+                  <span className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+                  <span className="text-sm text-foreground/60">
+                    Uploading...
+                  </span>
+                </div>
+              ) : form.resume_url ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
+                    {form.resume_url.endsWith(".pdf") ? (
+                      <FileIcon className="w-6 h-6 text-accent" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-accent" />
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-foreground">
+                    Resume uploaded
+                  </span>
+                  <span className="text-xs text-foreground/40">
+                    Click to replace
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">
+                    Click to upload your resume
+                  </span>
+                  <span className="text-xs text-foreground/40">
+                    PDF, JPG or PNG
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-foreground/40 font-medium">OR</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            {/* Paste text */}
             <textarea
               value={form.resume_text}
               onChange={(e) => update("resume_text", e.target.value)}
-              rows={10}
+              rows={8}
               placeholder="Paste your resume text here..."
               className="w-full px-4 py-3 border-2 border-border rounded-xl text-sm bg-white placeholder:text-foreground/30 focus:border-primary focus:ring-3 focus:ring-ring/20 outline-none transition-all duration-200 resize-none"
             />
@@ -533,6 +683,10 @@ export function Onboarding() {
               go back to edit any section.
             </p>
             <div className="space-y-3">
+              <ReviewRow
+                label="Full Name"
+                value={form.full_name || "—"}
+              />
               <ReviewRow
                 label="Education"
                 value={[
@@ -567,6 +721,16 @@ export function Onboarding() {
               <ReviewRow
                 label="Location"
                 value={form.location_preference || "—"}
+              />
+              <ReviewRow
+                label="Resume"
+                value={
+                  form.resume_url
+                    ? "File uploaded"
+                    : form.resume_text
+                    ? "Text pasted"
+                    : "—"
+                }
               />
             </div>
           </div>
@@ -612,6 +776,7 @@ export function Onboarding() {
         {/* Content card */}
         <div className="bg-white border border-border rounded-2xl p-8 shadow-sm">
           <h2 className="font-heading font-semibold text-xl text-foreground mb-6">
+            {step === "name" && "What's your name?"}
             {step === "education" && "Tell us about your education"}
             {step === "skills" && "What skills do you bring?"}
             {step === "interests" && "What are you passionate about?"}

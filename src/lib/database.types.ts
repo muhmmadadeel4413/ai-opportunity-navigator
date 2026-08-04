@@ -92,6 +92,7 @@ export type Database = {
           profile_embedding: string | null
           resume_parsed: Json | null
           resume_text: string | null
+          resume_url: string | null
           soft_skills: string[] | null
           technical_skills: string[] | null
           university: string | null
@@ -114,6 +115,7 @@ export type Database = {
           profile_embedding?: string | null
           resume_parsed?: Json | null
           resume_text?: string | null
+          resume_url?: string | null
           soft_skills?: string[] | null
           technical_skills?: string[] | null
           university?: string | null
@@ -136,6 +138,7 @@ export type Database = {
           profile_embedding?: string | null
           resume_parsed?: Json | null
           resume_text?: string | null
+          resume_url?: string | null
           soft_skills?: string[] | null
           technical_skills?: string[] | null
           university?: string | null

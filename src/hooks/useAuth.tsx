@@ -24,6 +24,7 @@ interface Profile {
   preferred_industry: string | null;
   location_preference: string | null;
   resume_text: string | null;
+  resume_url: string | null;
   resume_parsed: unknown | null;
   onboarding_complete: boolean;
 }
