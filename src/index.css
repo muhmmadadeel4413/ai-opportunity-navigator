@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --color-primary: oklch(0.5116 0.2053 280.36);
+  --color-on-primary: oklch(1.0 0 0);
+  --color-secondary: oklch(0.4702 0.2134 281.33);
+  --color-accent: oklch(0.7049 0.1867 47.6);
+  --color-background: oklch(0.9829 0.0313 94.55);
+  --color-foreground: oklch(0.2573 0.0861 281.29);
+  --color-muted: oklch(0.9621 0.0449 96.07);
+  --color-border: oklch(0.928 0.0149 270.7);
+  --color-destructive: oklch(0.6368 0.2078 25.33);
+  --color-ring: oklch(0.5116 0.2053 280.36);
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-background text-foreground font-sans antialiased;
+}
+
+/* Focus ring utility */
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
