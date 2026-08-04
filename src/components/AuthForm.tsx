@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Sparkles, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export function AuthForm() {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,17 +21,27 @@ export function AuthForm() {
     setLoading(true);
 
     if (isSignUp) {
-      const { error: err } = await signUp(email, password);
-      if (err) {
-        setError(err);
-      } else {
+      const result = await signUp(email, password);
+      if (result.error) {
+        setError(result.error);
+      } else if (result.needsEmailConfirmation) {
+        // Email confirmation is required — tell the user to check their inbox
         setSuccessMsg(
           "Account created! Check your email for a confirmation link, then sign in."
         );
+      } else {
+        // Session returned immediately, go to onboarding
+        navigate("/onboarding");
       }
     } else {
-      const { error: err } = await signIn(email, password);
-      if (err) setError(err);
+      const result = await signIn(email, password);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Navigate to dashboard — ProtectedRoute will redirect to /onboarding
+        // if the user hasn't completed onboarding yet
+        navigate("/dashboard");
+      }
     }
     setLoading(false);
   };

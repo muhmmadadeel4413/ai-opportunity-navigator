@@ -28,13 +28,20 @@ interface Profile {
   onboarding_complete: boolean;
 }
 
+interface SignUpResult {
+  error?: string;
+  needsEmailConfirmation?: boolean;
+}
+
+type SignInResult = { error?: string };
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string) => Promise<SignUpResult>;
+  signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -88,13 +95,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}` },
     });
-    if (error) return { error: error.message };
-    return {};
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    // If we got a session back (email confirmation disabled), immediately
+    // create the user's profile and set context state.
+    if (data.session) {
+      // save login session
+      setSession(data.session);
+      // save logged-in user
+      setUser(data.session.user);
+
+      // create empty profile
+      await supabase.from("profiles").insert({
+        id: data.session.user.id,
+        email,
+        onboarding_complete: false,
+      });
+    }
+
+    // Return a flag so the form knows whether the user can navigate immediately
+    return { needsEmailConfirmation: !data.session };
   };
 
   const signIn = async (email: string, password: string) => {
