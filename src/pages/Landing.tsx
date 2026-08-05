@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTheme } from "../hooks/useTheme";
 import {
   Sparkles, Search, Target, Bell, BarChart3, Compass,
   GraduationCap, Award, Zap, TrendingUp, BookOpen, Briefcase,
   Code, Cpu, FileText, Map, Bookmark, Clock, Layers,
   MessageCircle, Star, ChevronRight, Menu, X,
-  CheckCircle2, ArrowRight, Users, Building2,
+  CheckCircle2, ArrowRight, Users, Building2, Sun, Moon,
 } from "lucide-react";
 
 /* ─── Scroll Reveal Hook ─── */
@@ -108,6 +109,7 @@ const dashboardItems = [
 /* ─── Component ─── */
 export default function Landing() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -146,7 +148,7 @@ export default function Landing() {
 
       {/* ─── NAV ─── */}
       <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white/80 backdrop-blur-xl border-b border-border/50 shadow-sm" : "bg-transparent"
+        scrolled ? "bg-surface/80 backdrop-blur-xl border-b border-border/50 shadow-sm" : "bg-transparent"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -165,7 +167,13 @@ export default function Landing() {
                 >{l.label}</button>
               ))}
             </nav>
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-2">
+              <button onClick={toggleTheme}
+                className="p-2.5 rounded-xl hover:bg-foreground/5 transition-all cursor-pointer text-foreground/60 hover:text-foreground"
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
               <button onClick={() => navigate("/login")}
                 className="px-5 py-2.5 text-sm font-semibold text-foreground/80 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all cursor-pointer"
               >Login</button>
@@ -179,7 +187,7 @@ export default function Landing() {
           </div>
         </div>
         {mobileOpen && (
-          <div className="lg:hidden border-t border-border/50 bg-white/95 backdrop-blur-xl">
+          <div className="lg:hidden border-t border-border/50 bg-surface/95 backdrop-blur-xl">
             <div className="px-4 py-4 space-y-1">
               {navLinks.map(l => (
                 <button key={l.href} onClick={() => st(l.href)}
@@ -704,7 +712,7 @@ export default function Landing() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="bg-foreground text-background py-12">
+      <footer className="bg-gray-950 text-gray-300 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="sm:col-span-2 lg:col-span-2">
@@ -712,51 +720,51 @@ export default function Landing() {
                 <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="font-heading font-bold text-xl">
+                <span className="font-heading font-bold text-xl text-white">
                   Opp<span className="text-primary">Nav</span>
                 </span>
               </div>
-              <p className="text-background/60 text-sm max-w-md leading-relaxed">
+              <p className="text-gray-400 text-sm max-w-md leading-relaxed">
                 AI Opportunity Navigator helps students discover internships, scholarships, hackathons,
                 fellowships, competitions, jobs, and bootcamps — all personalized by AI.
               </p>
               <div className="flex items-center gap-4 mt-6">
                 {[Star, MessageCircle, Search, Bell].map((Icon, i) => (
                   <div key={i} className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4 text-gray-400" />
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h3 className="font-heading font-semibold text-sm text-background/80 mb-4">Quick Links</h3>
+              <h3 className="font-heading font-semibold text-sm text-gray-400 mb-4">Quick Links</h3>
               <ul className="space-y-2.5">
                 {["Home", "Features", "Services", "How It Works", "FAQ"].map((link) => (
                   <li key={link}>
                     <button onClick={() => st(`#${link.toLowerCase().replace(/\s+/g, "-")}`)}
-                      className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer"
+                      className="text-sm text-gray-500 hover:text-white transition-colors cursor-pointer"
                     >{link}</button>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="font-heading font-semibold text-sm text-background/80 mb-4">Get Started</h3>
+              <h3 className="font-heading font-semibold text-sm text-gray-400 mb-4">Get Started</h3>
               <ul className="space-y-2.5">
                 <li>
-                  <button onClick={() => navigate("/login")} className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer">Sign Up</button>
+                  <button onClick={() => navigate("/login")} className="text-sm text-gray-500 hover:text-white transition-colors cursor-pointer">Sign Up</button>
                 </li>
                 <li>
-                  <button onClick={() => navigate("/login")} className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer">Login</button>
+                  <button onClick={() => navigate("/login")} className="text-sm text-gray-500 hover:text-white transition-colors cursor-pointer">Login</button>
                 </li>
                 <li>
-                  <button onClick={() => navigate("/login")} className="text-sm text-background/50 hover:text-background transition-colors cursor-pointer">Dashboard</button>
+                  <button onClick={() => navigate("/login")} className="text-sm text-gray-500 hover:text-white transition-colors cursor-pointer">Dashboard</button>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-10 pt-6 border-t border-white/10 text-center">
-            <p className="text-xs text-background/40">
+          <div className="mt-10 pt-6 border-t border-gray-800 text-center">
+            <p className="text-xs text-gray-600">
               &copy; {new Date().getFullYear()} AI Opportunity Navigator. Built for students, by dreamers.
             </p>
           </div>

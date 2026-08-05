@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Sparkles, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { SiGoogle } from "react-icons/si";
 
 export function AuthForm() {
   const navigate = useNavigate();
@@ -12,7 +13,10 @@ export function AuthForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const { signIn, signUp } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +50,37 @@ export function AuthForm() {
     setLoading(false);
   };
 
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setSuccessMsg("");
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // Redirect to Google — the page will leave. No state to reset.
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Couldn't start Google sign-in. Please try again."
+      );
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+    const result = await resetPassword(email);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setResetSent(true);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -67,15 +102,88 @@ export function AuthForm() {
         {/* Card */}
         <div className="bg-white border border-border rounded-2xl p-8 shadow-sm">
           <h1 className="font-heading font-semibold text-xl text-foreground mb-1">
-            {isSignUp ? "Create your account" : "Welcome back"}
+            {resetMode
+              ? "Reset your password"
+              : isSignUp
+              ? "Create your account"
+              : "Welcome back"}
           </h1>
           <p className="text-sm text-foreground/60 mb-6">
-            {isSignUp
+            {resetMode
+              ? "Enter your email and we'll send you a reset link"
+              : isSignUp
               ? "Start discovering your next opportunity"
               : "Sign in to continue your journey"}
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {resetMode ? (
+            <>
+              <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
+                <div>
+                  <label
+                    htmlFor="reset-email"
+                    className="block text-sm font-medium text-foreground mb-1.5"
+                  >
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                    <input
+                      id="reset-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="you@example.com"
+                      className="w-full pl-10 pr-4 py-3 border-2 border-border rounded-xl text-foreground bg-white placeholder:text-foreground/30 focus:border-primary focus:ring-3 focus:ring-ring/20 outline-none transition-all duration-200"
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="bg-destructive/10 text-destructive text-sm rounded-xl px-4 py-3">
+                    {error}
+                  </div>
+                )}
+
+                {resetSent && (
+                  <div className="bg-accent/10 text-accent text-sm rounded-xl px-4 py-3">
+                    Reset link sent! Check your email to set a new password.
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-accent text-white font-semibold rounded-xl hover:opacity-90 active:scale-[0.97] transition-all duration-150 cursor-pointer disabled:opacity-50 mt-2"
+                >
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      Sending link...
+                    </span>
+                  ) : (
+                    "Send reset link"
+                  )}
+                </button>
+              </form>
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetMode(false);
+                    setError("");
+                    setSuccessMsg("");
+                    setResetSent(false);
+                  }}
+                  className="text-sm text-primary hover:underline cursor-pointer"
+                >
+                  Back to sign in
+                </button>
+              </div>
+            </>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label
                 htmlFor="email"
@@ -131,6 +239,22 @@ export function AuthForm() {
               </div>
             </div>
 
+            {!isSignUp && (
+              <div className="flex justify-end -mt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetMode(true);
+                    setError("");
+                    setSuccessMsg("");
+                  }}
+                  className="text-sm text-primary hover:underline cursor-pointer"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
             {error && (
               <div className="bg-destructive/10 text-destructive text-sm rounded-xl px-4 py-3">
                 {error}
@@ -160,6 +284,30 @@ export function AuthForm() {
               )}
             </button>
           </form>
+          )}
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-foreground/40 font-medium">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Google sign-in */}
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+            className="flex items-center justify-center gap-3 w-full py-3 bg-white border-2 border-border rounded-xl text-foreground font-medium hover:bg-muted hover:border-foreground/20 active:scale-[0.97] transition-all duration-150 cursor-pointer disabled:opacity-50"
+          >
+            {googleLoading ? (
+              <span className="animate-spin h-5 w-5 border-2 border-foreground/30 border-t-foreground rounded-full" />
+            ) : (
+              <SiGoogle className="w-5 h-5" />
+            )}
+            {googleLoading
+              ? "Redirecting to Google..."
+              : "Continue with Google"}
+          </button>
 
           <div className="mt-6 text-center">
             <button

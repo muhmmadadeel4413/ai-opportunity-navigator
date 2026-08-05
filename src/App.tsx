@@ -8,6 +8,11 @@ import { Onboarding } from "./pages/Onboarding";
 import { Dashboard } from "./pages/Dashboard";
 import { Matches } from "./pages/Matches";
 import { Saved } from "./pages/Saved";
+import InternshipFinder from "./pages/InternshipFinder";
+import ScholarshipFinder from "./pages/ScholarshipFinder";
+import HackathonFinder from "./pages/HackathonFinder";
+import FellowshipFinder from "./pages/FellowshipFinder";
+import JobFinder from "./pages/JobFinder";
 import AISmartSearch from "./pages/AISmartSearch";
 import AICareerCoach from "./pages/AICareerCoach";
 import ApplicationTracker from "./pages/ApplicationTracker";
@@ -15,6 +20,7 @@ import AIRecommendations from "./pages/AIRecommendations";
 import ResumeAnalysis from "./pages/ResumeAnalysis";
 import CareerRoadmap from "./pages/CareerRoadmap";
 import DeadlineReminders from "./pages/DeadlineReminders";
+import StudyPlanner from "./pages/StudyPlanner";
 import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
@@ -63,6 +69,56 @@ export default function App() {
               <ProtectedRoute>
                 <Layout>
                   <Saved />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/internship-finder"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <InternshipFinder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scholarship-finder"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ScholarshipFinder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hackathon-finder"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <HackathonFinder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fellowship-finder"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <FellowshipFinder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/job-finder"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <JobFinder />
                 </Layout>
               </ProtectedRoute>
             }
@@ -133,6 +189,16 @@ export default function App() {
               <ProtectedRoute>
                 <Layout>
                   <DeadlineReminders />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/study-planner"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <StudyPlanner />
                 </Layout>
               </ProtectedRoute>
             }

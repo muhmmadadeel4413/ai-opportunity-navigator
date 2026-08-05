@@ -1,31 +1,127 @@
-import { LineChart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LineChart, Sparkles, RefreshCw, Loader2, BookOpen, Target, Users, Zap } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../lib/supabase";
 
 export default function AIRecommendations() {
+  const { user } = useAuth();
+  const [recommendations, setRecommendations] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const generateRecommendations = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(
+        "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            mode: "recommendations",
+            user_id: user.id,
+          }),
+        }
+      );
+
+      const result = await resp.json();
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setRecommendations(result.data);
+      }
+    } catch {
+      setError("Failed to generate recommendations. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    generateRecommendations();
+  }, []);
+
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="font-heading font-bold text-2xl md:text-3xl text-foreground mb-2">
-          AI Recommendations
-        </h1>
-        <p className="text-foreground/60">
-          Discover tailored recommendations for courses, skills, and
-          opportunities to advance your career.
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-xl flex items-center justify-center">
+            <LineChart className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="font-heading font-bold text-2xl md:text-3xl text-foreground">
+              AI Recommendations
+            </h1>
+            <p className="text-foreground/60">
+              Personalized recommendations to advance your career
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={generateRecommendations}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-xl transition-all cursor-pointer"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
       </div>
 
-      <div className="bg-white border border-border rounded-2xl p-8 shadow-sm text-center">
-        <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <LineChart className="w-8 h-8 text-indigo-600" />
+      {error && !recommendations && (
+        <div className="mb-6 bg-destructive/10 text-destructive text-sm rounded-xl px-4 py-3">{error}</div>
+      )}
+
+      {loading && !recommendations && (
+        <div className="bg-white border border-border rounded-2xl p-10 text-center">
+          <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-foreground/60">Analyzing your profile for personalized recommendations...</p>
         </div>
-        <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
-          AI Recommendations — Coming Soon
-        </h3>
-        <p className="text-foreground/60 max-w-md mx-auto">
-          Based on your profile, goals, and market trends, get smart
-          recommendations for skills to learn, courses to take, and
-          opportunities to pursue next.
-        </p>
+      )}
+
+      <div className="bg-white border border-border rounded-2xl p-6 md:p-8 shadow-sm">
+        {recommendations ? (
+          <div>
+            <div className="flex items-center gap-2 mb-6 text-accent">
+              <Sparkles className="w-5 h-5" />
+              <span className="font-heading font-semibold">AI-Powered Recommendations</span>
+            </div>
+            <div className="text-foreground/80 leading-relaxed whitespace-pre-wrap text-sm">
+              {recommendations}
+            </div>
+          </div>
+        ) : !error ? (
+          <div className="text-center py-10">
+            <LineChart className="w-12 h-12 text-foreground/20 mx-auto mb-3" />
+            <p className="text-foreground/60">No recommendations generated yet.</p>
+          </div>
+        ) : null}
       </div>
+
+      {recommendations && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div className="bg-white border border-border rounded-xl p-4">
+            <BookOpen className="w-5 h-5 text-primary mb-2" />
+            <p className="text-xs text-foreground/50">Skills</p>
+            <p className="text-sm font-semibold text-foreground">What to learn next</p>
+          </div>
+          <div className="bg-white border border-border rounded-xl p-4">
+            <Target className="w-5 h-5 text-accent mb-2" />
+            <p className="text-xs text-foreground/50">Opportunities</p>
+            <p className="text-sm font-semibold text-foreground">Where to focus</p>
+          </div>
+          <div className="bg-white border border-border rounded-xl p-4">
+            <Users className="w-5 h-5 text-secondary mb-2" />
+            <p className="text-xs text-foreground/50">Network</p>
+            <p className="text-sm font-semibold text-foreground">How to connect</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

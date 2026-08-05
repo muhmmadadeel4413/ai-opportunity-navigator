@@ -37,7 +37,7 @@ interface Match {
 }
 
 export function Matches() {
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ export function Matches() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session?.access_token}`,
           },
-          body: JSON.stringify({ user_id: profile!.id, top_k: 10 }),
+          body: JSON.stringify({ user_id: user!.id, top_k: 10 }),
         }
       );
       const result = await resp.json();
@@ -100,27 +100,28 @@ export function Matches() {
 
   const handleSave = async (match: Match) => {
     setSavingId(match.opportunity.id);
-    if (savedIds.has(match.opportunity.id)) {
+    const oppId = match.opportunity.id;
+    if (savedIds.has(oppId)) {
       // Unsave
       await supabase
         .from("saved_opportunities")
         .delete()
-        .eq("user_id", profile!.id)
-        .eq("opportunity_id", match.opportunity.id);
+        .eq("user_id", user!.id)
+        .eq("opportunity_id", oppId);
       setSavedIds((prev) => {
         const next = new Set(prev);
-        next.delete(match.opportunity.id);
+        next.delete(oppId);
         return next;
       });
     } else {
       // Save
       await supabase.from("saved_opportunities").insert({
-        user_id: profile!.id,
-        opportunity_id: match.opportunity.id,
+        user_id: user!.id,
+        opportunity_id: oppId,
         match_score: match.match_score,
         ai_explanation: match.ai_explanation,
       });
-      setSavedIds((prev) => new Set(prev).add(match.opportunity.id));
+      setSavedIds((prev) => new Set(prev).add(oppId));
     }
     setSavingId(null);
   };

@@ -111,7 +111,7 @@ const interestSuggestions = [
 ];
 
 export function Onboarding() {
-  const { profile, refreshProfile } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("name");
   const [form, setForm] = useState<FormData>(initialFormData);
@@ -310,12 +310,18 @@ export function Onboarding() {
   };
 
   const handleFinish = async () => {
+    if (!user) {
+      setStepError("Session expired. Please sign in again.");
+      setSaving(false);
+      return;
+    }
+
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
       .upsert({
-        id: profile!.id,
-        email: profile!.email,
+        id: user.id,
+        email: user.email!,
         full_name: form.full_name.trim() || null,
         education_level: form.education_level || null,
         university: form.university || null,
