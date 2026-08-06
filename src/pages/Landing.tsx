@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../hooks/useTheme";
+import { BackButton } from "../components/BackButton";
 import {
   Sparkles, Search, Target, Bell, BarChart3, Compass,
   GraduationCap, Award, Zap, TrendingUp, BookOpen, Briefcase,

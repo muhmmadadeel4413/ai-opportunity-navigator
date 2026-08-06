@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../hooks/useTheme";
 import { useState, useRef, useEffect } from "react";
+import { BackButton } from "./BackButton";
 import {
   LayoutDashboard,
   Briefcase,
@@ -307,9 +308,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="md:pl-[248px]">
         {/* Top bar */}
         <header className="hidden md:flex items-center justify-between h-14 px-8 border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-30">
-          <span className="text-sm font-medium text-foreground">
-            {currentPage}
-          </span>
+          <div className="flex items-center gap-3">
+            <BackButton />
+            <span className="text-sm font-medium text-foreground">
+              {currentPage}
+            </span>
+          </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={toggleTheme}
@@ -334,7 +338,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* ===== Mobile header ===== */}
         <header className="md:hidden flex items-center justify-between h-14 px-4 bg-surface border-b border-border">
-          <Link to="/dashboard" className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <BackButton />
+            <Link to="/dashboard" className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-[7px] bg-foreground text-background flex items-center justify-center">
               <Compass className="w-[15px] h-[15px]" strokeWidth={2.5} aria-hidden="true" />
             </div>
@@ -342,6 +348,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               OppNav
             </span>
           </Link>
+          </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={toggleTheme}

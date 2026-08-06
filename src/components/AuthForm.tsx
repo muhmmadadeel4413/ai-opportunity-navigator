@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { BackButton } from "./BackButton";
 import { Sparkles, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 
@@ -82,7 +83,11 @@ export function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      {/* Back button */}
+      <div className="absolute top-4 left-4">
+        <BackButton fallbackPath="/" />
+      </div>
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="text-center mb-8">
