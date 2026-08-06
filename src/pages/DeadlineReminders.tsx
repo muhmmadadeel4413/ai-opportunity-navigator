@@ -184,7 +184,7 @@ export default function DeadlineReminders() {
 
       {/* Overdue */}
       {overdue.length > 0 && (
-        <Section title="Overdue" icon={AlertTriangle} color="text-destructive" accent="border-l-destructive">
+        <Section title="Overdue" icon={AlertTriangle} color="text-destructive">
           {overdue.map((item) => {
             const o = item.opportunity;
             if (!o) return null;
@@ -197,7 +197,7 @@ export default function DeadlineReminders() {
 
       {/* Due Soon */}
       {dueSoon.length > 0 && (
-        <Section title="Due Soon" icon={Clock} color="text-amber-600" accent="border-l-amber-500">
+        <Section title="Due Soon" icon={Clock} color="text-amber-600">
           {dueSoon.map((item) => {
             const o = item.opportunity;
             if (!o) return null;
@@ -210,7 +210,7 @@ export default function DeadlineReminders() {
 
       {/* Upcoming */}
       {upcoming.length > 0 && (
-        <Section title="Upcoming (next 2 weeks)" icon={CalendarClock} color="text-blue-600" accent="border-l-blue-500">
+        <Section title="Upcoming (next 2 weeks)" icon={CalendarClock} color="text-blue-600">
           {upcoming.map((item) => {
             const o = item.opportunity;
             if (!o) return null;
@@ -223,7 +223,7 @@ export default function DeadlineReminders() {
 
       {/* Later */}
       {later.length > 0 && (
-        <Section title="Later" icon={CheckCircle2} color="text-green-600" accent="border-l-green-500">
+        <Section title="Later" icon={CheckCircle2} color="text-green-600">
           {later.map((item) => {
             const o = item.opportunity;
             if (!o) return null;
@@ -241,13 +241,11 @@ function Section({
   title,
   icon: Icon,
   color,
-  accent,
   children,
 }: {
   title: string;
   icon: typeof Sparkles;
   color: string;
-  accent: string;
   children: React.ReactNode;
 }) {
   return (

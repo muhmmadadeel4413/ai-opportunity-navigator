@@ -53,7 +53,7 @@ export default function ApplicationTracker() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newAppId, setNewAppId] = useState("");
-  const [availableOpps, setAvailableOpps] = useState<TrackedApp["opportunity"][]>([]);
+  const [availableOpps, setAvailableOpps] = useState<(TrackedApp["opportunity"] & { id: string })[]>([]);
 
   const fetchApps = async () => {
     if (!profile) return;

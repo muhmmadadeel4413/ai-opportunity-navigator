@@ -88,9 +88,6 @@ export default function StudyPlanner() {
   };
 
   const totalMinutes = tasks.reduce((sum, t) => sum + t.duration, 0);
-  const completedMinutes = tasks
-    .filter((t) => t.completed)
-    .reduce((sum, t) => sum + t.duration, 0);
   const completedCount = tasks.filter((t) => t.completed).length;
   const progress = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
   const streak = localStorage.getItem("oppnav-study-streak") || "0";
@@ -298,7 +295,7 @@ export default function StudyPlanner() {
           </div>
         ) : (
           <div className="space-y-3">
-            {tasks.map((task, i) => {
+            {tasks.map((task) => {
               const colorIdx = task.subject.length % SUBJECT_COLORS.length;
               return (
                 <div
