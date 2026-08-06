@@ -1,29 +1,81 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../hooks/useTheme";
+import { useState, useRef, useEffect } from "react";
 import {
   LayoutDashboard,
-  Sparkles,
-  Bookmark,
-  LogOut,
-  Menu,
-  X,
   Briefcase,
-  UserCircle2,
-  ChevronDown,
   GraduationCap,
   Zap,
   Award,
   Target,
+  Bot,
+  Search,
+  Sparkles,
+  FileText,
+  Map,
+  ClipboardList,
+  Bell,
+  CalendarDays,
+  Bookmark,
+  LogOut,
+  Menu,
+  X,
+  UserCircle2,
+  ChevronDown,
   Sun,
   Moon,
-  CalendarDays,
-  Settings,
-  Mail,
-  Bell,
-  ChevronRight,
+  Compass,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+
+type NavItem = {
+  label: string;
+  path: string;
+  icon: typeof LayoutDashboard;
+};
+
+const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
+  {
+    label: "Overview",
+    items: [{ label: "Dashboard", path: "/dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Discover",
+    items: [
+      { label: "Internships", path: "/internship-finder", icon: Briefcase },
+      { label: "Scholarships", path: "/scholarship-finder", icon: GraduationCap },
+      { label: "Hackathons", path: "/hackathon-finder", icon: Zap },
+      { label: "Fellowships", path: "/fellowship-finder", icon: Award },
+      { label: "Jobs", path: "/job-finder", icon: Target },
+    ],
+  },
+  {
+    label: "AI Tools",
+    items: [
+      { label: "Career Coach", path: "/ai-career-coach", icon: Bot },
+      { label: "Smart Search", path: "/ai-smart-search", icon: Search },
+      { label: "Recommendations", path: "/ai-recommendations", icon: Sparkles },
+      { label: "Resume Analysis", path: "/resume-analysis", icon: FileText },
+      { label: "Career Roadmap", path: "/career-roadmap", icon: Map },
+    ],
+  },
+  {
+    label: "Track",
+    items: [
+      { label: "Applications", path: "/application-tracker", icon: ClipboardList },
+      { label: "Deadlines", path: "/deadline-reminders", icon: Bell },
+      { label: "Study Planner", path: "/study-planner", icon: CalendarDays },
+      { label: "Saved", path: "/saved", icon: Bookmark },
+    ],
+  },
+];
+
+const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap((s) => s.items);
+
+const PAGE_TITLES: Record<string, string> = {
+  "/profile": "Profile",
+  "/matches": "Matches",
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { profile, signOut } = useAuth();
@@ -31,44 +83,66 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
 
-  const navItems = [
-    { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { label: "Internship Finder", path: "/internship-finder", icon: Briefcase },
-    { label: "Scholarship Finder", path: "/scholarship-finder", icon: GraduationCap },
-    { label: "Hackathon Finder", path: "/hackathon-finder", icon: Zap },
-    { label: "Fellowship Programs", path: "/fellowship-finder", icon: Award },
-    { label: "Job Opportunity", path: "/job-finder", icon: Target },
-    { label: "Application Tracker", path: "/application-tracker", icon: Briefcase },
-    { label: "Deadline Reminders", path: "/deadline-reminders", icon: Bell },
-    { label: "Study Planner", path: "/study-planner", icon: CalendarDays },
-    { label: "Saved Opportunities", path: "/saved", icon: Bookmark },
-  ];
+  const avatarInitial = (
+    profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || "?"
+  ).toUpperCase();
+
+  const currentPage =
+    ALL_NAV_ITEMS.find((i) => i.path === location.pathname)?.label ||
+    PAGE_TITLES[location.pathname] ||
+    "";
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
   };
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+      if (
+        settingsRef.current &&
+        !settingsRef.current.contains(e.target as Node)
+      ) {
         setSettingsOpen(false);
       }
     };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSettingsOpen(false);
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
   }, []);
 
-  const renderNavLink = (item: { label: string; path: string; icon: typeof LayoutDashboard }, onClick?: () => void) => {
+  const renderAvatar = (size: "sm" | "md" = "md") => {
+    const cls = size === "sm" ? "w-7 h-7" : "w-8 h-8";
+    return (
+      <div
+        className={`${cls} rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0`}
+      >
+        {profile?.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt=""
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <span className="text-[11px] font-semibold text-foreground">
+            {avatarInitial}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const renderNavLink = (item: NavItem, onClick?: () => void) => {
     const Icon = item.icon;
     const active = location.pathname === item.path;
     return (
@@ -76,324 +150,313 @@ export function Layout({ children }: { children: React.ReactNode }) {
         key={item.path}
         to={item.path}
         onClick={onClick}
-        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+        aria-current={active ? "page" : undefined}
+        className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 cursor-pointer ${
           active
-            ? "bg-primary text-on-primary shadow-sm"
-            : "text-foreground hover:bg-muted"
+            ? "bg-muted text-foreground font-medium"
+            : "text-foreground hover:bg-muted hover:text-foreground"
         }`}
       >
-        <Icon className="w-5 h-5 shrink-0" />
+        <Icon
+          className={`h-[18px] w-[18px] shrink-0 transition-colors duration-150 ${
+            active
+              ? "text-primary"
+              : "text-foreground-muted group-hover:text-foreground"
+          }`}
+          strokeWidth={2}
+          aria-hidden="true"
+        />
         <span className="truncate">{item.label}</span>
+        {active && (
+          <span
+            className="absolute left-0 top-1/2 h-[14px] w-[3px] -translate-y-1/2 rounded-full bg-primary"
+            aria-hidden="true"
+          />
+        )}
       </Link>
     );
   };
 
-  const settingsPanel = (
+  const settingsMenu = (
     <>
-      {/* Email */}
-      <div className="flex items-center gap-3 px-4 py-2.5">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Mail className="w-4 h-4 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-foreground/50 uppercase tracking-wider font-semibold">
-            Account
-          </p>
-          <p className="text-sm text-foreground truncate">
-            {profile?.email || "Not signed in"}
-          </p>
-        </div>
+      <div className="px-3.5 py-2.5 border-b border-border">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-foreground-muted">
+          Signed in as
+        </p>
+        <p className="mt-0.5 text-[13px] font-medium text-foreground truncate">
+          {profile?.email}
+        </p>
       </div>
-      {/* Dark mode toggle */}
-      <button
-        onClick={toggleTheme}
-        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted rounded-xl transition-all duration-200 cursor-pointer"
-      >
-        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-          {theme === "dark" ? (
-            <Sun className="w-4 h-4 text-accent" />
-          ) : (
-            <Moon className="w-4 h-4 text-accent" />
-          )}
-        </div>
-        <span className="flex-1 text-left">{theme === "dark" ? "Dark Mode" : "Light Mode"}</span>
-        <div
-          className={`relative w-10 h-6 rounded-full transition-colors duration-300 ${
-            theme === "dark" ? "bg-primary" : "bg-border"
-          }`}
-        >
-          <span
-            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${
-              theme === "dark" ? "left-[18px]" : "left-0.5"
-            }`}
-          />
-        </div>
-      </button>
-      {/* View profile */}
       <Link
         to="/profile"
         onClick={() => {
           setSettingsOpen(false);
-          setProfileOpen(false);
+          setMobileOpen(false);
         }}
-        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted rounded-xl transition-all duration-200 cursor-pointer"
+        role="menuitem"
+        className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
       >
-        <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0">
-          <UserCircle2 className="w-4 h-4 text-secondary" />
-        </div>
+        <UserCircle2 className="w-4 h-4 text-foreground-muted" aria-hidden="true" />
         View Profile
       </Link>
-      {/* Sign out */}
+      <button
+        onClick={toggleTheme}
+        role="menuitem"
+        className="flex items-center gap-2.5 w-full px-3.5 py-2 text-[13px] font-medium text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+      >
+        {theme === "dark" ? (
+          <>
+            <Sun className="w-4 h-4 text-foreground-muted" aria-hidden="true" />
+            Light mode
+          </>
+        ) : (
+          <>
+            <Moon className="w-4 h-4 text-foreground-muted" aria-hidden="true" />
+            Dark mode
+          </>
+        )}
+      </button>
+      <hr className="border-border mx-2 my-1" role="separator" />
       <button
         onClick={handleSignOut}
-        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-destructive hover:bg-destructive/5 rounded-xl transition-all duration-200 cursor-pointer"
+        role="menuitem"
+        className="flex items-center gap-2.5 w-full px-3.5 py-2 text-[13px] font-medium text-destructive hover:bg-destructive/5 transition-colors duration-150 cursor-pointer"
       >
-        <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
-          <LogOut className="w-4 h-4 text-destructive" />
-        </div>
-        Sign Out
+        <LogOut className="w-4 h-4" aria-hidden="true" />
+        Sign out
       </button>
     </>
   );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:w-64 md:bg-surface md:border-r md:border-border">
-        <div className="flex flex-col h-full p-6">
+      {/* ===== Desktop Sidebar ===== */}
+      <aside className="hidden md:flex md:fixed md:inset-y-0 md:w-[248px] md:flex-col bg-surface border-r border-border z-40">
+        <div className="flex h-full flex-col">
+          {/* Brand */}
           <Link
             to="/dashboard"
-            className="flex items-center gap-2 mb-8 group"
+            className="flex items-center gap-2.5 h-14 px-5 shrink-0 group"
           >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-7 h-7 rounded-[7px] bg-foreground text-background flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+              <Compass className="w-[15px] h-[15px]" strokeWidth={2.5} aria-hidden="true" />
             </div>
-            <span className="font-heading font-semibold text-lg text-foreground">
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">
               OppNav
             </span>
           </Link>
 
-          <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto">
-            {navItems.map((item) => renderNavLink(item))}
+          {/* Navigation */}
+          <nav
+            className="flex-1 overflow-y-auto px-3 pb-4 pt-3 space-y-5 [scrollbar-width:thin] [scrollbar-color:var(--color-border)_transparent]"
+            aria-label="Main navigation"
+          >
+            {NAV_SECTIONS.map((section) => (
+              <div key={section.label}>
+                <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground-muted">
+                  {section.label}
+                </p>
+                <div className="flex flex-col gap-px">
+                  {section.items.map((item) => renderNavLink(item))}
+                </div>
+              </div>
+            ))}
           </nav>
 
-          {/* Bottom: Settings */}
-          <div className="border-t border-border pt-4 mt-2" ref={settingsRef}>
-            {/* Profile row */}
-            <Link
-              to="/profile"
-              className="flex items-center gap-3 px-2 mb-2 hover:bg-muted rounded-xl py-1.5 transition-colors cursor-pointer"
-            >
-              <div className="w-9 h-9 bg-accent/10 rounded-full flex items-center justify-center overflow-hidden">
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="text-accent font-heading font-semibold text-sm">
-                    {profile?.full_name?.charAt(0)?.toUpperCase() ||
-                      profile?.email?.charAt(0)?.toUpperCase() ||
-                      "?"}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {profile?.full_name || "My Account"}
-                </p>
-                <p className="text-xs text-foreground/50 truncate">{profile?.email}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-foreground/30" />
-            </Link>
-
-            {/* Settings toggle */}
+          {/* User chip */}
+          <div className="border-t border-border p-3" ref={settingsRef}>
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
-              className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 cursor-pointer ${
-                settingsOpen
-                  ? "bg-muted text-foreground"
-                  : "text-foreground hover:bg-muted"
-              }`}
               aria-expanded={settingsOpen}
+              aria-haspopup="menu"
+              className="flex w-full items-center gap-2.5 rounded-lg p-2 text-left transition-colors duration-150 cursor-pointer hover:bg-muted"
             >
-              <Settings
-                className={`w-4 h-4 shrink-0 transition-transform duration-300 ${
-                  settingsOpen ? "rotate-90" : ""
-                }`}
-              />
-              Settings
+              {renderAvatar()}
+              <div className="flex-1 min-w-0">
+                <p className="truncate text-[13px] font-medium text-foreground">
+                  {profile?.full_name || profile?.email || "My Account"}
+                </p>
+                {profile?.full_name && (
+                  <p className="truncate text-[11px] text-foreground-muted">
+                    {profile?.email}
+                  </p>
+                )}
+              </div>
               <ChevronDown
-                className={`w-4 h-4 ml-auto text-foreground/40 transition-transform duration-200 ${
+                className={`w-3.5 h-3.5 text-foreground-muted transition-transform duration-200 ${
                   settingsOpen ? "rotate-180" : ""
                 }`}
+                aria-hidden="true"
               />
             </button>
 
+            {/* Settings popover (opens upward) */}
             {settingsOpen && (
-              <div className="mt-1 flex flex-col gap-0.5 animate-[fadeIn_0.2s_ease-out]">
-                {settingsPanel}
+              <div
+                role="menu"
+                className="absolute bottom-full left-3 right-3 mb-2 rounded-xl border border-border bg-surface shadow-xl shadow-zinc-900/10 py-1.5 z-50 overflow-hidden animate-[fadeIn_0.12s_ease-out]"
+              >
+                {settingsMenu}
               </div>
             )}
           </div>
         </div>
       </aside>
 
-      {/* Mobile header */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-heading font-semibold text-foreground">
-            OppNav
+      {/* ===== Desktop content area ===== */}
+      <div className="md:pl-[248px]">
+        {/* Top bar */}
+        <header className="hidden md:flex items-center justify-between h-14 px-8 border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-30">
+          <span className="text-sm font-medium text-foreground">
+            {currentPage}
           </span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 text-foreground" />
-            ) : (
-              <Moon className="w-5 h-5 text-foreground" />
-            )}
-          </button>
-          {/* Profile button on mobile */}
-          <button
-            onClick={() => navigate("/profile")}
-            className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center hover:bg-accent/20 transition-colors cursor-pointer overflow-hidden"
-            aria-label="Profile"
-          >
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span className="text-accent font-heading font-semibold text-xs">
-                {profile?.full_name?.charAt(0)?.toUpperCase() ||
-                  profile?.email?.charAt(0)?.toUpperCase() ||
-                  "?"}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? (
-              <X className="w-5 h-5 text-foreground" />
-            ) : (
-              <Menu className="w-5 h-5 text-foreground" />
-            )}
-          </button>
-        </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-[18px] h-[18px]" aria-hidden="true" />
+              ) : (
+                <Moon className="w-[18px] h-[18px]" aria-hidden="true" />
+              )}
+            </button>
+            <Link
+              to="/profile"
+              className="rounded-lg hover:bg-muted transition-colors duration-150 cursor-pointer p-0.5"
+              aria-label="Profile"
+            >
+              {renderAvatar("sm")}
+            </Link>
+          </div>
+        </header>
+
+        {/* ===== Mobile header ===== */}
+        <header className="md:hidden flex items-center justify-between h-14 px-4 bg-surface border-b border-border">
+          <Link to="/dashboard" className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-[7px] bg-foreground text-background flex items-center justify-center">
+              <Compass className="w-[15px] h-[15px]" strokeWidth={2.5} aria-hidden="true" />
+            </div>
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">
+              OppNav
+            </span>
+          </Link>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-[18px] h-[18px]" aria-hidden="true" />
+              ) : (
+                <Moon className="w-[18px] h-[18px]" aria-hidden="true" />
+              )}
+            </button>
+            <Link
+              to="/profile"
+              className="rounded-lg hover:bg-muted transition-colors duration-150 cursor-pointer p-0.5"
+              aria-label="Profile"
+            >
+              {renderAvatar("sm")}
+            </Link>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? (
+                <X className="w-[18px] h-[18px]" aria-hidden="true" />
+              ) : (
+                <Menu className="w-[18px] h-[18px]" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        </header>
+
+        {/* ===== Main content ===== */}
+        <main className="flex-1 min-h-[calc(100vh-56px)]">
+          {children}
+        </main>
       </div>
 
-      {/* Mobile nav drawer */}
+      {/* ===== Mobile drawer overlay ===== */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/20 backdrop-blur-sm">
-          <div className="absolute right-0 top-0 bottom-0 w-72 bg-surface shadow-xl p-6 flex flex-col overflow-y-auto">
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="self-end p-2 rounded-lg hover:bg-muted cursor-pointer mb-4"
-              aria-label="Close menu"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto">
-              {navItems.map((item) =>
-                renderNavLink(item, () => setMobileOpen(false))
-              )}
+        <div className="md:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer */}
+          <div className="absolute right-0 top-0 bottom-0 w-[280px] bg-surface shadow-xl flex flex-col overflow-y-auto animate-[slideIn_0.2s_ease-out]">
+            <div className="flex items-center justify-between h-14 px-4 border-b border-border shrink-0">
+              <span className="text-[15px] font-semibold tracking-tight text-foreground">
+                Menu
+              </span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+                aria-label="Close menu"
+              >
+                <X className="w-[18px] h-[18px]" aria-hidden="true" />
+              </button>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5" aria-label="Mobile navigation">
+              {NAV_SECTIONS.map((section) => (
+                <div key={section.label}>
+                  <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground-muted">
+                    {section.label}
+                  </p>
+                  <div className="flex flex-col gap-px">
+                    {section.items.map((item) =>
+                      renderNavLink(item, () => setMobileOpen(false))
+                    )}
+                  </div>
+                </div>
+              ))}
             </nav>
-            <div className="border-t border-border pt-4 mt-2">
-              <div className="flex flex-col gap-0.5">{settingsPanel}</div>
+
+            {/* Mobile bottom actions */}
+            <div className="border-t border-border p-3 space-y-px">
+              <Link
+                to="/profile"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-[13px] font-medium text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+              >
+                <UserCircle2 className="w-[18px] h-[18px] text-foreground-muted" aria-hidden="true" />
+                View Profile
+              </Link>
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-[13px] font-medium text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
+              >
+                {theme === "dark" ? (
+                  <>
+                    <Sun className="w-[18px] h-[18px] text-foreground-muted" aria-hidden="true" />
+                    Light mode
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-[18px] h-[18px] text-foreground-muted" aria-hidden="true" />
+                    Dark mode
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-[13px] font-medium text-destructive hover:bg-destructive/5 transition-colors duration-150 cursor-pointer"
+              >
+                <LogOut className="w-[18px] h-[18px]" aria-hidden="true" />
+                Sign out
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Top bar with profile button (desktop) */}
-      <div className="hidden md:flex md:pl-64">
-        <div className="flex items-center justify-end w-full px-8 py-3 bg-surface/80 backdrop-blur-sm border-b border-border">
-          <div className="relative" ref={profileRef}>
-            <button
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted transition-colors cursor-pointer"
-              aria-label="Profile menu"
-            >
-              <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center overflow-hidden">
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="text-accent font-heading font-semibold text-xs">
-                    {profile?.full_name?.charAt(0)?.toUpperCase() ||
-                      profile?.email?.charAt(0)?.toUpperCase() ||
-                      "?"}
-                  </span>
-                )}
-              </div>
-              <span className="text-sm font-medium text-foreground hidden lg:inline">
-                {profile?.full_name || profile?.email}
-              </span>
-              <ChevronDown className="w-4 h-4 text-foreground/40" />
-            </button>
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-surface border border-border rounded-xl shadow-lg py-2 z-50">
-                <Link
-                  to="/profile"
-                  onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <UserCircle2 className="w-4 h-4" />
-                  View Profile
-                </Link>
-                <hr className="border-border my-1" />
-                <button
-                  onClick={toggleTheme}
-                  className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
-                >
-                  {theme === "dark" ? (
-                    <>
-                      <Sun className="w-4 h-4" />
-                      Light mode
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="w-4 h-4" />
-                      Dark mode
-                    </>
-                  )}
-                </button>
-                <hr className="border-border my-1" />
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-destructive hover:bg-destructive/5 transition-colors cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <main className="md:pl-64 pt-0 md:pt-0">{children}</main>
     </div>
   );
 }

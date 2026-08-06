@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { LineChart, Sparkles, RefreshCw, Loader2, BookOpen, Target, Users, Zap } from "lucide-react";
+import { LineChart, Sparkles, RefreshCw, Loader2, BookOpen, Target, Users } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../lib/supabase";
+import { callAI } from "../lib/ai";
 
 export default function AIRecommendations() {
   const { user } = useAuth();
@@ -15,36 +15,19 @@ export default function AIRecommendations() {
     setError("");
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const resp = await fetch(
-        "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            mode: "recommendations",
-            user_id: user.id,
-          }),
-        }
+      const result = await callAI({ mode: "recommendations" });
+      setRecommendations(result.content);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to generate recommendations. Please try again."
       );
-
-      const result = await resp.json();
-      if (result.error) {
-        setError(result.error);
-      } else {
-        setRecommendations(result.data);
-      }
-    } catch {
-      setError("Failed to generate recommendations. Please try again.");
     }
     setLoading(false);
   };
 
   useEffect(() => {
     generateRecommendations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

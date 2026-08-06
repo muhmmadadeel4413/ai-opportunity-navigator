@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Sparkles, Send, Loader2, Bookmark, Building2, MapPin, Clock, ExternalLink, ChevronRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
+import { callAI } from "../lib/ai";
 
 interface Opportunity {
   id: string;
@@ -18,10 +19,19 @@ interface Opportunity {
   tags: string[];
 }
 
+interface SearchCriteria {
+  keywords?: string[];
+  types?: string[];
+  remote_only?: boolean;
+  skill_focus?: string[];
+  deadline_window?: "any" | "soon" | "this_month";
+}
+
 export default function AISmartSearch() {
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [aiResponse, setAiResponse] = useState("");
+  const [criteria, setCriteria] = useState<SearchCriteria | null>(null);
   const [results, setResults] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -38,7 +48,7 @@ export default function AISmartSearch() {
       .then(({ data }) => {
         if (data) setSavedIds(new Set(data.map((s) => s.opportunity_id)));
       });
-  }, []);
+  }, [user]);
 
   const handleSearch = async () => {
     if (!query.trim() || loading || !user) return;
@@ -47,52 +57,79 @@ export default function AISmartSearch() {
     setError("");
     setSearched(true);
     setAiResponse("");
+    setCriteria(null);
 
     try {
-      // First, get AI interpretation of the search query
-      const { data: { session } } = await supabase.auth.getSession();
-      const aiResp = await fetch(
-        "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            mode: "smart_search",
-            query: query.trim(),
-            user_id: user.id,
-          }),
-        }
-      );
+      // 1) AI interprets the natural-language query into structured criteria
+      const result = await callAI({ mode: "smart_search", query: query.trim() });
+      setAiResponse(result.content);
 
-      const aiResult = await aiResp.json();
-      if (aiResult.data) {
-        setAiResponse(aiResult.data);
-      }
+      const parsed = result.data as { criteria?: SearchCriteria } | null;
+      const c: SearchCriteria = parsed?.criteria ?? {};
+      setCriteria(c);
 
-      // Then search opportunities by text match
-      const searchTerm = query.trim().toLowerCase();
+      const keywords = [...(c.keywords ?? []), ...(c.skill_focus ?? [])]
+        .filter(Boolean)
+        .map((k) => k.toLowerCase());
+
+      // 2) Query opportunities, apply filters in JS
       const { data: opps } = await supabase
         .from("opportunities")
         .select("*")
         .eq("is_active", true)
-        .limit(20);
+        .limit(100);
 
-      if (opps) {
-        const filtered = opps.filter(
-          (o) =>
-            o.title.toLowerCase().includes(searchTerm) ||
-            o.description.toLowerCase().includes(searchTerm) ||
-            o.organization.toLowerCase().includes(searchTerm) ||
-            o.tags?.some((t: string) => t.toLowerCase().includes(searchTerm)) ||
-            o.required_skills?.some((s: string) => s.toLowerCase().includes(searchTerm))
-        );
-        setResults(filtered);
+      if (!opps) {
+        setResults([]);
+        return;
       }
-    } catch {
-      setError("Search failed. Please try again.");
+
+      const types = c.types?.length ? new Set(c.types.map((t) => t.toLowerCase())) : null;
+
+      let filtered = (opps as Opportunity[]).filter((o) => {
+        if (types && !types.has(o.opportunity_type.toLowerCase())) return false;
+        if (c.remote_only && !o.is_remote) return false;
+        return true;
+      });
+
+      // Keyword scoring
+      if (keywords.length > 0) {
+        const scored = filtered.map((o) => {
+          const haystack = [
+            o.title,
+            o.description,
+            o.organization,
+            ...(o.required_skills ?? []),
+            ...(o.tags ?? []),
+          ]
+            .join(" ")
+            .toLowerCase();
+          const hits = keywords.filter((k) => haystack.includes(k)).length;
+          return { o, hits };
+        });
+        scored.sort((a, b) => b.hits - a.hits);
+        filtered = scored.filter((s) => s.hits > 0).map((s) => s.o);
+        if (filtered.length === 0) {
+          // fall back to unscored if nothing matched keywords
+          filtered = scored.map((s) => s.o);
+        }
+      }
+
+      // Deadline window filtering
+      if (c.deadline_window && c.deadline_window !== "any") {
+        const now = new Date();
+        const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        filtered = filtered.filter((o) => {
+          if (!o.application_deadline) return c.deadline_window === "any";
+          const d = new Date(o.application_deadline);
+          if (c.deadline_window === "soon") return d >= now && d.getTime() - now.getTime() <= 7 * 24 * 60 * 60 * 1000;
+          return d >= now && d <= monthFromNow;
+        });
+      }
+
+      setResults(filtered.slice(0, 20));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Search failed. Please try again.");
     }
     setLoading(false);
   };
@@ -187,6 +224,18 @@ export default function AISmartSearch() {
             <div>
               <p className="text-sm font-medium text-foreground mb-1">AI understands:</p>
               <p className="text-sm text-foreground/80 whitespace-pre-wrap">{aiResponse}</p>
+              {criteria?.types && criteria.types.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {criteria.types.map((t) => (
+                    <span key={t} className={`text-xs px-2.5 py-1 rounded-full capitalize ${typeBadgeColor(t)}`}>
+                      {t}
+                    </span>
+                  ))}
+                  {criteria.remote_only && (
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">Remote</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

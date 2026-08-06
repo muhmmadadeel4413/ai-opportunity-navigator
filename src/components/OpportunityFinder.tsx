@@ -11,12 +11,10 @@ import {
   Building2,
   ChevronRight,
   Search,
-  Filter,
   GraduationCap,
   Zap,
   AlertTriangle,
   CheckCircle2,
-  X,
   RefreshCw,
   ArrowLeft,
 } from "lucide-react";

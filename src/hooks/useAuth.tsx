@@ -12,6 +12,7 @@ interface Profile {
   id: string;
   email: string;
   full_name: string | null;
+  avatar_url: string | null;
   education_level: string | null;
   university: string | null;
   major: string | null;

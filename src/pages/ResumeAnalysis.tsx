@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Sparkles, Upload, Loader2 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
+import { callAI } from "../lib/ai";
 
 export default function ResumeAnalysis() {
-  const { user } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [analysis, setAnalysis] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [hasResume, setHasResume] = useState(false);
+
+  // Check if user already has a resume on mount
+  const hasResume = !!profile?.resume_text;
+
+  useEffect(() => {
+    if (profile?.resume_text && !analysis) {
+      // Optionally auto-analyze if resume exists? We wait for user action.
+    }
+  }, [profile, analysis]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -21,7 +30,7 @@ export default function ResumeAnalysis() {
     try {
       const text = await file.text();
       await supabase.from("profiles").update({ resume_text: text }).eq("id", user.id);
-      setHasResume(true);
+      await refreshProfile();
     } catch {
       setError("Failed to upload resume. Please try again.");
     }
@@ -34,24 +43,12 @@ export default function ResumeAnalysis() {
     setError("");
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const resp = await fetch(
-        "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ mode: "resume_analysis", user_id: user.id }),
-        }
+      const result = await callAI({ mode: "resume_analysis" });
+      setAnalysis(result.content);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to analyze resume. Please try again."
       );
-
-      const result = await resp.json();
-      if (result.error) setError(result.error);
-      else setAnalysis(result.data);
-    } catch {
-      setError("Failed to analyze resume. Please try again.");
     }
     setLoading(false);
   };

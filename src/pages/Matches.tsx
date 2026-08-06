@@ -52,7 +52,12 @@ export function Matches() {
     // Check session storage first
     const cached = sessionStorage.getItem("latest_matches");
     if (cached) {
-      setMatches(JSON.parse(cached));
+      try {
+        setMatches(JSON.parse(cached));
+      } catch {
+        // Stale/corrupt cache — ignore and fall through to fresh fetch
+        sessionStorage.removeItem("latest_matches");
+      }
       setLoading(false);
       sessionStorage.removeItem("latest_matches");
       return;
@@ -71,7 +76,7 @@ export function Matches() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session?.access_token}`,
           },
-          body: JSON.stringify({ user_id: user!.id, top_k: 10 }),
+          body: JSON.stringify({ top_k: 10 }),
         }
       );
       const result = await resp.json();
@@ -87,12 +92,13 @@ export function Matches() {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchMatches();
     // Load saved opportunity IDs
     supabase
       .from("saved_opportunities")
       .select("opportunity_id")
-      .eq("user_id", profile!.id)
+      .eq("user_id", user!.id)
       .then(({ data }) => {
         if (data) setSavedIds(new Set(data.map((s) => s.opportunity_id)));
       });

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Map, Sparkles, Loader2, RefreshCw, Target, BookOpen, Briefcase, Eye } from "lucide-react";
+import { Map, Sparkles, Loader2, RefreshCw, Target, BookOpen, Eye } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../lib/supabase";
+import { callAI } from "../lib/ai";
 
 export default function CareerRoadmap() {
   const { user } = useAuth();
@@ -15,36 +15,19 @@ export default function CareerRoadmap() {
     setError("");
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const resp = await fetch(
-        "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            mode: "career_roadmap",
-            user_id: user.id,
-          }),
-        }
+      const result = await callAI({ mode: "career_roadmap" });
+      setRoadmap(result.content);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to generate roadmap. Please try again."
       );
-
-      const result = await resp.json();
-      if (result.error) {
-        setError(result.error);
-      } else {
-        setRoadmap(result.data);
-      }
-    } catch {
-      setError("Failed to generate roadmap. Please try again.");
     }
     setLoading(false);
   };
 
   useEffect(() => {
     generateRoadmap();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

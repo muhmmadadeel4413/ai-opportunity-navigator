@@ -29,6 +29,8 @@
   --color-surface-dark: oklch(0.16 0.02 260);
   --color-primary-dark: oklch(0.62 0.19 264.38);
   --color-accent-dark: oklch(0.8 0.16 61.6);
+  --color-foreground-muted: oklch(0.445 0.03 260);
+  --color-foreground-muted-dark: oklch(0.72 0.02 260);
 }
 
 /* Base styles */
@@ -63,6 +65,18 @@ body {
 .dark .text-primary {
   color: var(--color-primary-dark);
 }
+.dark .text-foreground-muted {
+  color: var(--color-foreground-muted-dark);
+}
+.dark .bg-foreground {
+  background-color: var(--color-foreground-dark);
+}
+.dark .text-background {
+  color: var(--color-background-dark);
+}
+.dark .bg-surface\/80 {
+  background-color: color-mix(in oklab, var(--color-surface-dark) 80%, transparent);
+}
 .dark .shadow-sm,
 .dark .shadow-md,
 .dark .shadow-lg,
@@ -80,6 +94,17 @@ body {
 *:focus-visible {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
 /* Respect reduced motion */

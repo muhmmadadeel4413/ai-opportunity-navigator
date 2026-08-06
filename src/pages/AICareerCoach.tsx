@@ -1,68 +1,70 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, User, Sparkles } from "lucide-react";
+import { Bot, Send, User } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../lib/supabase";
+import { callAI } from "../lib/ai";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
+const SUGGESTIONS = [
+  "What skills should I learn for data science?",
+  "How do I prepare for technical interviews?",
+  "What internships are good for CS freshmen?",
+  "How do I build a strong portfolio?",
+  "Should I focus on open source or side projects?",
+];
+
 export default function AICareerCoach() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your AI Career Coach. I can help you with career advice, interview tips, skill development, and more. What would you like to talk about?",
+      content:
+        "Hi! I'm your AI Career Coach. I can help you with career advice, interview tips, skill development, and more. What would you like to talk about?",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const chatEnd = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     chatEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading || !user) return;
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText || input).trim();
+    if (!text || loading || !user) return;
 
-    const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    setShowSuggestions(false);
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
     setLoading(true);
     setError("");
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const resp = await fetch(
-        "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            mode: "career_coach",
-            query: userMsg,
-            user_id: user.id,
-          }),
-        }
-      );
+      const conversation = messages
+        .filter((m) => m.role !== "assistant" || m !== messages[0]) // skip welcome message from context
+        .slice(-10);
 
-      const result = await resp.json();
-      if (result.error) {
-        setError(result.error);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: result.data },
-        ]);
-      }
-    } catch {
-      setError("Failed to get response. Please try again.");
+      const result = await callAI({
+        mode: "career_coach",
+        query: text,
+        conversation,
+      });
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: result.content },
+      ]);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to get response. Please try again."
+      );
     }
     setLoading(false);
   };
@@ -139,10 +141,29 @@ export default function AICareerCoach() {
           </div>
         )}
 
+        {/* Suggestion chips */}
+        {showSuggestions && messages.length === 1 && !loading && (
+          <div className="px-4 md:px-6 pb-3">
+            <p className="text-xs text-foreground/40 mb-2">Try asking:</p>
+            <div className="flex flex-wrap gap-2">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSend(s)}
+                  className="text-xs px-3 py-1.5 bg-muted hover:bg-foreground/10 text-foreground/70 rounded-full transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.97]"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Input */}
         <div className="border-t border-border p-4 md:p-6">
           <div className="flex gap-3">
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -152,15 +173,16 @@ export default function AICareerCoach() {
               disabled={loading}
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={loading || !input.trim()}
               className="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-purple-500/25 active:scale-[0.97] transition-all duration-150 disabled:opacity-50 cursor-pointer"
+              aria-label="Send message"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
           <p className="text-xs text-foreground/40 mt-2">
-            Powered by AI — responses are generated based on your profile
+            Powered by AI — responses are personalized to your profile
           </p>
         </div>
       </div>

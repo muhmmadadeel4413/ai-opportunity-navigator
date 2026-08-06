@@ -107,7 +107,7 @@ export function Dashboard() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session?.access_token}`,
           },
-          body: JSON.stringify({ user_id: profile!.id, top_k: 10 }),
+          body: JSON.stringify({ top_k: 10 }),
         }
       );
       const result = await resp.json();
