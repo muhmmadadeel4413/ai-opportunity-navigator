@@ -8,32 +8,57 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-heading: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Light mode - Professional clean palette */
+  /* =========================
+     LIGHT MODE
+     ========================= */
+
   --color-primary: oklch(0.488 0.243 264.38);
-  --color-on-primary: oklch(1.0 0 0);
+  --color-on-primary: oklch(1 0 0);
+
   --color-secondary: oklch(0.546 0.245 262.88);
   --color-accent: oklch(0.7049 0.1867 47.6);
+
   --color-background: oklch(0.96 0.007 260);
   --color-foreground: oklch(0.145 0.045 260);
+
   --color-muted: oklch(0.94 0.01 260);
   --color-border: oklch(0.89 0.015 260);
+
   --color-destructive: oklch(0.577 0.245 27.33);
   --color-ring: oklch(0.488 0.243 264.38);
-  --color-surface: oklch(1.0 0 0);
 
-  /* Dark mode tokens */
-  --color-background-dark: oklch(0.12 0.02 260);
-  --color-foreground-dark: oklch(0.93 0.015 260);
-  --color-muted-dark: oklch(0.18 0.02 260);
-  --color-border-dark: oklch(0.25 0.025 260);
-  --color-surface-dark: oklch(0.16 0.02 260);
-  --color-primary-dark: oklch(0.62 0.19 264.38);
-  --color-accent-dark: oklch(0.8 0.16 61.6);
+  --color-surface: oklch(1 0 0);
+
   --color-foreground-muted: oklch(0.445 0.03 260);
+
+  /* =========================
+     DARK MODE
+     ========================= */
+
+  --color-background-dark: oklch(0.12 0.02 260);
+  --color-foreground-dark: oklch(0.94 0.015 260);
+
+  --color-muted-dark: oklch(0.18 0.02 260);
+  --color-border-dark: oklch(0.27 0.025 260);
+
+  --color-surface-dark: oklch(0.16 0.02 260);
+
+  --color-primary-dark: oklch(0.68 0.18 264.38);
+  --color-secondary-dark: oklch(0.64 0.18 262.88);
+
+  --color-accent-dark: oklch(0.8 0.16 61.6);
+
   --color-foreground-muted-dark: oklch(0.72 0.02 260);
+
+  --color-destructive-dark: oklch(0.65 0.22 27.33);
+
+  --color-ring-dark: oklch(0.68 0.18 264.38);
 }
 
-/* Base styles */
+/* =========================
+   BASE
+   ========================= */
+
 html {
   scroll-behavior: smooth;
 }
@@ -42,72 +67,249 @@ body {
   @apply bg-background text-foreground font-sans antialiased;
 }
 
-/* Dark mode - comprehensive overrides */
+/* =========================
+   DARK MODE
+   ========================= */
+
 .dark body {
-  @apply bg-background-dark text-foreground-dark;
+  background-color: var(--color-background-dark);
+  color: var(--color-foreground-dark);
 }
+
+/* Backgrounds */
+
+.dark .bg-background {
+  background-color: var(--color-background-dark);
+}
+
 .dark .bg-white,
 .dark .bg-surface {
   background-color: var(--color-surface-dark);
 }
+
 .dark .bg-muted {
   background-color: var(--color-muted-dark);
 }
-.dark .bg-background {
-  background-color: var(--color-background-dark);
-}
-.dark .border-border {
-  border-color: var(--color-border-dark);
-}
+
+/* Text */
+
 .dark .text-foreground {
   color: var(--color-foreground-dark);
 }
-.dark .text-primary {
-  color: var(--color-primary-dark);
-}
-.dark .text-foreground-muted {
-  color: var(--color-foreground-muted-dark);
-}
-.dark .bg-foreground {
-  background-color: var(--color-foreground-dark);
-}
+
 .dark .text-background {
   color: var(--color-background-dark);
 }
-.dark .bg-surface\/80 {
-  background-color: color-mix(in oklab, var(--color-surface-dark) 80%, transparent);
+
+.dark .text-primary {
+  color: var(--color-primary-dark);
 }
+
+.dark .text-secondary {
+  color: var(--color-secondary-dark);
+}
+
+.dark .text-foreground-muted {
+  color: var(--color-foreground-muted-dark);
+}
+
+/* Borders */
+
+.dark .border-border {
+  border-color: var(--color-border-dark);
+}
+
+/* Foreground backgrounds */
+
+.dark .bg-foreground {
+  background-color: var(--color-foreground-dark);
+}
+
+/* Semi-transparent surfaces */
+
+.dark .bg-surface\/80 {
+  background-color: color-mix(
+    in oklab,
+    var(--color-surface-dark) 80%,
+    transparent
+  );
+}
+
+/* =========================
+   COMMON WHITE / BLACK
+   OVERRIDES
+   ========================= */
+
+/*
+   These help prevent components that
+   still use hardcoded Tailwind colors
+   from looking broken in dark mode.
+*/
+
+.dark .bg-gray-50 {
+  background-color: oklch(0.14 0.02 260);
+}
+
+.dark .bg-gray-100 {
+  background-color: oklch(0.18 0.02 260);
+}
+
+.dark .bg-gray-200 {
+  background-color: oklch(0.23 0.025 260);
+}
+
+.dark .text-gray-900 {
+  color: oklch(0.94 0.015 260);
+}
+
+.dark .text-gray-800 {
+  color: oklch(0.9 0.015 260);
+}
+
+.dark .text-gray-700 {
+  color: oklch(0.82 0.02 260);
+}
+
+.dark .text-gray-600 {
+  color: oklch(0.72 0.02 260);
+}
+
+.dark .text-gray-500 {
+  color: oklch(0.65 0.02 260);
+}
+
+.dark .border-gray-100 {
+  border-color: oklch(0.22 0.02 260);
+}
+
+.dark .border-gray-200 {
+  border-color: oklch(0.27 0.025 260);
+}
+
+/* Hardcoded black backgrounds */
+
+.dark .bg-black {
+  background-color: oklch(0.08 0.015 260);
+}
+
+/* =========================
+   FORM ELEMENTS
+   ========================= */
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: oklch(0.13 0.02 260);
+  color: var(--color-foreground-dark);
+  border-color: var(--color-border-dark);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: oklch(0.58 0.02 260);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--color-primary-dark);
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+.dark button:disabled {
+  opacity: 0.5;
+}
+
+/* =========================
+   DROPDOWNS / POPOVERS / MODALS
+   ========================= */
+
+.dark [role="dialog"],
+.dark [role="menu"],
+.dark [role="listbox"] {
+  background-color: var(--color-surface-dark);
+  color: var(--color-foreground-dark);
+  border-color: var(--color-border-dark);
+}
+
+/* =========================
+   SHADOWS
+   ========================= */
+
 .dark .shadow-sm,
 .dark .shadow-md,
 .dark .shadow-lg,
 .dark .shadow-xl {
-  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --tw-shadow: 0 4px 15px 0 rgb(0 0 0 / 0.35);
   box-shadow: var(--tw-shadow);
 }
 
-/* All cards with .bg-white class also get .bg-surface for dark mode */
-.bg-white {
-  background-color: var(--color-surface);
-}
+/* =========================
+   FOCUS
+   ========================= */
 
-/* Focus ring utility */
 *:focus-visible {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
 }
 
-/* Keyframes */
+.dark *:focus-visible {
+  outline-color: var(--color-ring-dark);
+}
+
+/* =========================
+   TRANSITIONS
+   ========================= */
+
+body,
+.bg-white,
+.bg-surface,
+.bg-muted,
+.bg-background,
+.border-border,
+.text-foreground,
+.shadow-sm,
+.shadow-md {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* =========================
+   ANIMATIONS
+   ========================= */
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
-/* Respect reduced motion */
+/* =========================
+   REDUCED MOTION
+   ========================= */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -118,8 +320,6 @@ body {
     scroll-behavior: auto !important;
   }
 }
-
-/* Theme transition */
-body, .bg-white, .bg-surface, .bg-muted, .bg-background, .border-border, .text-foreground, .shadow-sm, .shadow-md {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+.dark body {
+  background: red !important;
 }
