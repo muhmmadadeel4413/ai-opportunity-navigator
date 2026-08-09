@@ -614,7 +614,7 @@ export default function Landing() {
                       <Sparkles className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <p className="font-heading font-bold text-lg text-foreground">OppNav</p>
+                      <p className="font-heading font-bold text-lg text-foreground">OppNavvv</p>
                       <p className="text-sm text-foreground/50">AI Opportunity Navigator</p>
                     </div>
                   </div>
