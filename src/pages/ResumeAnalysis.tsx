@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   FileText,
   Sparkles,
-  Upload,
+  Upload, 
   Loader2,
   CheckCircle2,
   AlertCircle,
