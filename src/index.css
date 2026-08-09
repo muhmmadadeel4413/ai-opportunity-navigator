@@ -320,6 +320,3 @@ body,
     scroll-behavior: auto !important;
   }
 }
-.dark body {
-  background: red !important;
-}
