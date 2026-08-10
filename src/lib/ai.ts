@@ -16,12 +16,18 @@ interface CallAIOptions {
 
 /**
  * Unified helper for calling the AI edge function.
- * Handles auth, fetch, error normalization, and response parsing.
+ * Handles auth, fetch, errors, and response parsing.
  */
-export async function callAI(options: CallAIOptions): Promise<CallAIResult> {
+export async function callAI(
+  options: CallAIOptions
+): Promise<CallAIResult> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error("You must be signed in to use AI features.");
+  }
 
   const resp = await fetch(
     "https://bficpbbezccjpdifzxek.supabase.co/functions/v1/ai-query",
@@ -29,7 +35,7 @@ export async function callAI(options: CallAIOptions): Promise<CallAIResult> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.access_token}`,
+        Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify(options),
     }
@@ -38,11 +44,22 @@ export async function callAI(options: CallAIOptions): Promise<CallAIResult> {
   const result = await resp.json();
 
   if (!resp.ok) {
-    throw new Error(result.error || "The AI service is unavailable. Please try again.");
+    throw new Error(
+      result.error ||
+        "The AI service is unavailable. Please try again."
+    );
+  }
+
+  let content = "";
+
+  if (typeof result.content === "string") {
+    content = result.content;
+  } else if (result.data) {
+    content = JSON.stringify(result.data);
   }
 
   return {
-    content: result.content || result.data || "",
+    content,
     data: result.data ?? undefined,
   };
 }

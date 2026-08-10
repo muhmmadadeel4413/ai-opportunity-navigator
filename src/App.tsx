@@ -1,4 +1,3 @@
-//hallo
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -23,6 +22,7 @@ import CareerRoadmap from "./pages/CareerRoadmap";
 import DeadlineReminders from "./pages/DeadlineReminders";
 import StudyPlanner from "./pages/StudyPlanner";
 import ProfilePage from "./pages/ProfilePage";
+
 
 export default function App() {
   return (
@@ -54,6 +54,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/matches"
             element={
@@ -64,6 +65,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/saved"
             element={
@@ -74,6 +76,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/internship-finder"
             element={
@@ -84,6 +87,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/scholarship-finder"
             element={
@@ -94,6 +98,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/hackathon-finder"
             element={
@@ -104,6 +109,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/fellowship-finder"
             element={
@@ -114,6 +120,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/job-finder"
             element={
@@ -124,6 +131,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/ai-smart-search"
             element={
@@ -134,6 +142,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/ai-career-coach"
             element={
@@ -144,6 +153,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/application-tracker"
             element={
@@ -154,6 +164,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/ai-recommendations"
             element={
@@ -164,6 +175,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/resume-analysis"
             element={
@@ -174,6 +186,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/career-roadmap"
             element={
@@ -184,6 +197,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/deadline-reminders"
             element={
@@ -194,6 +208,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/study-planner"
             element={
@@ -204,6 +219,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/profile"
             element={
@@ -215,6 +231,7 @@ export default function App() {
             }
           />
 
+         
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -222,3 +239,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+

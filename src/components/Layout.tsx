@@ -254,7 +254,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const settingsMenu = (
     <>
-      <div className="px-3.5 py-2 border-b border-border">
+      <div className="px-3.5 py-2">
         <p className="text-[11px] text-foreground-muted">
           Signed in as
         </p>
@@ -310,23 +310,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {/* ===== Desktop Sidebar ===== */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-[248px] flex-col border-r border-border bg-surface">
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-[248px] flex-col bg-surface border-r border-border z-40">
         {/* Brand */}
-        <div className="flex items-center h-14 px-5 border-b border-border shrink-0">
+        <div className="h-14 px-5 flex items-center border-b border-border shrink-0">
           <Link
             to="/dashboard"
             className="flex items-center gap-2.5"
           >
-            <div className="w-7 h-7 rounded-[7px] bg-foreground text-background flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[8px] bg-foreground text-background flex items-center justify-center shrink-0">
               <Compass
-                className="w-[15px] h-[15px]"
+                className="w-[17px] h-[17px]"
                 strokeWidth={2.5}
                 aria-hidden="true"
               />
             </div>
 
             <span className="text-[15px] font-semibold tracking-tight text-foreground">
-              OppNav
+              Opportunity Navigator
             </span>
           </Link>
         </div>
@@ -455,7 +455,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <span className="text-[15px] font-semibold tracking-tight text-foreground">
-              OppNav
+              Opportunity Navigator
             </span>
           </Link>
 
@@ -622,3 +622,4 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
