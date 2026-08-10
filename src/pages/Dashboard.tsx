@@ -651,22 +651,11 @@ export function Dashboard() {
                 <Sparkles className="w-3.5 h-3.5" />
                 Opportunity Navigator
               </div>
-
               {/* SMALLER WELCOME HEADING */}
-              <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold leading-tight tracking-tight">
-                Welcome back
-                {profile?.full_name
-                  ? `, ${profile.full_name.split(" ")[0]}`
-                  : ""}
-                <span className="block mt-1 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  Find your next opportunity.
-                </span>
+              <h1 className="text-2xl font-bold text-foreground">
+                Welcome back <span className="animate-wave inline-block">👋</span>
               </h1>
-
-              {/* SHORTER DESCRIPTION */}
-              <p className="mt-2 text-sm text-foreground/60 max-w-lg">
-                Discover, match, and track the right opportunities with AI.
-              </p>
+               <p className="text-gray-500 dark:text-gray-400 mt-1">Here is your opportunity snapshot for today</p>
             </div>
           </AnimatedSection>
         </section>
