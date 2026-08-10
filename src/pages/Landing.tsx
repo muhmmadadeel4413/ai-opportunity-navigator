@@ -348,6 +348,10 @@ export default function Landing() {
     { x: number; y: number; s: number }[]
   >([]);
 
+  /* ─── Google Drive Demo Video ─── */
+  const demoVideoUrl =
+    "https://drive.google.com/file/d/13OSrT8EL3aPkRbQK_ghiRvzCP3R2450o/view?usp=sharing";
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
 
@@ -370,32 +374,35 @@ export default function Landing() {
 
   const scrollToSection = (href: string) => {
     setMobileOpen(false);
+
     document
       .querySelector(href)
       ?.scrollIntoView({ behavior: "smooth" });
   };
 
+  /* ─── Open Demo Video ─── */
+  const openDemoVideo = () => {
+    window.open(demoVideoUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* ─── Floating particles ─── */}
-      {stars.length > 0 && (
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          {stars.map((star, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-primary/20 animate-pulse"
-              style={{
-                left: `${star.x}%`,
-                top: `${star.y}%`,
-                width: `${star.s}px`,
-                height: `${star.s}px`,
-                animationDelay: `${i * 0.3}s`,
-                animationDuration: `${2 + star.s * 1.5}s`,
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {stars.length > 0 &&
+        stars.map((star, i) => (
+          <div
+            key={i}
+            className="fixed z-0 rounded-full bg-primary/20 animate-pulse pointer-events-none"
+            style={{
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: `${star.s}px`,
+              height: `${star.s}px`,
+              animationDelay: `${i * 0.3}s`,
+              animationDuration: `${2 + star.s * 1.5}s`,
+            }}
+          />
+        ))}
 
       {/* ─── NAV ─── */}
       <header
@@ -562,7 +569,12 @@ export default function Landing() {
                     <ArrowRight className="inline-block ml-2 w-4 h-4" />
                   </button>
 
-                  <button className="w-full sm:w-auto px-8 py-3.5 text-foreground/70 font-semibold rounded-xl border border-border hover:border-foreground/20 hover:text-foreground hover:bg-foreground/5 active:scale-[0.97] transition-all cursor-pointer text-base flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={openDemoVideo}
+                    className="w-full sm:w-auto px-8 py-3.5 text-foreground/70 font-semibold rounded-xl border border-border hover:border-foreground/20 hover:text-foreground hover:bg-foreground/5 active:scale-[0.97] transition-all cursor-pointer text-base flex items-center justify-center gap-2"
+                    aria-label="Watch demo video"
+                  >
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -1212,7 +1224,7 @@ export default function Landing() {
 
                     <div>
                       <p className="font-heading font-bold text-lg text-foreground">
-                        OppNavvv
+                        OppNav
                       </p>
 
                       <p className="text-sm text-foreground/50">
@@ -1346,10 +1358,11 @@ export default function Landing() {
               </button>
 
               <button
-                onClick={() => navigate("/login")}
+                type="button"
+                onClick={openDemoVideo}
                 className="w-full sm:w-auto px-10 py-4 text-foreground/70 font-semibold rounded-xl border border-border hover:border-foreground/20 hover:text-foreground hover:bg-foreground/5 active:scale-[0.97] transition-all cursor-pointer text-lg"
               >
-                Learn More
+                Watch Demo
               </button>
             </div>
           </AnimatedSection>
@@ -1396,22 +1409,21 @@ export default function Landing() {
 
               <ul className="space-y-2.5">
                 {[
-                  "Home",
-                  "Features",
-                  "Services",
-                  "How It Works",
-                  "FAQ",
+                  { label: "Home", href: "#hero" },
+                  { label: "Features", href: "#features" },
+                  { label: "Services", href: "#services" },
+                  {
+                    label: "How It Works",
+                    href: "#how-it-works",
+                  },
+                  { label: "FAQ", href: "#faq" },
                 ].map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <button
-                      onClick={() =>
-                        scrollToSection(
-                          `#${link.toLowerCase().replace(/\s+/g, "-")}`
-                        )
-                      }
+                      onClick={() => scrollToSection(link.href)}
                       className="text-sm text-foreground/50 hover:text-foreground transition-colors cursor-pointer"
                     >
-                      {link}
+                      {link.label}
                     </button>
                   </li>
                 ))}
@@ -1465,4 +1477,3 @@ export default function Landing() {
     </div>
   );
 }
-
